@@ -113,9 +113,9 @@ export default function StudentController() {
 
   if (view === "login") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-green-500 font-mono p-4">
-        <div className="border border-green-800 p-8 rounded-lg shadow-lg shadow-green-900/20 w-full max-w-md bg-zinc-950">
-          <h1 className="text-2xl mb-6 text-center tracking-widest uppercase border-b border-green-900 pb-2">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-cyan-500 font-mono p-4">
+        <div className="border border-cyan-800 p-8 rounded-lg shadow-lg shadow-cyan-900/20 w-full max-w-md bg-zinc-950">
+          <h1 className="text-2xl mb-6 text-center tracking-widest uppercase border-b border-cyan-900 pb-2">
             Identity Verification
           </h1>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -127,13 +127,13 @@ export default function StudentController() {
                 type="text"
                 value={inputName}
                 onChange={(e) => setInputName(e.target.value)}
-                className="w-full bg-black border border-green-700 text-green-400 p-3 rounded focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 transition-all placeholder-green-900"
+                className="w-full bg-black border border-cyan-700 text-cyan-400 p-3 rounded focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all placeholder-cyan-900"
                 placeholder="Name..."
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-green-900 hover:bg-green-800 text-green-100 py-3 rounded uppercase tracking-wider font-bold transition-colors"
+              className="w-full bg-cyan-900 hover:bg-cyan-800 text-cyan-100 py-3 rounded uppercase tracking-wider font-bold transition-colors"
             >
               Initialize Link
             </button>
@@ -178,26 +178,24 @@ export default function StudentController() {
 
   // Common UI for Game and Stealth (The HUD)
   const isStealth = view === "stealth";
-  const hudColor = isStealth ? "blue" : "red"; // Subtle internal difference maybe? Or keep them identical as requested.
-  // Request said: "Stealth Mode: It should look exactly like the Game Mode (dark, techy) so peers don't notice."
-  // So I will use the same layout.
+  // The HUD color is now consistently cyan/blue for "futuristic"
 
   return (
-    <div className="min-h-screen bg-black text-red-500 font-mono flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-black text-cyan-400 font-mono flex flex-col relative overflow-hidden">
       {/* Background Grid Effect */}
       <div className="absolute inset-0 opacity-10 pointer-events-none"
-        style={{ backgroundImage: 'linear-gradient(#330000 1px, transparent 1px), linear-gradient(90deg, #330000 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+        style={{ backgroundImage: 'linear-gradient(#003333 1px, transparent 1px), linear-gradient(90deg, #003333 1px, transparent 1px)', backgroundSize: '40px 40px' }}
       />
 
       {/* Header HUD */}
-      <div className="p-4 border-b border-red-900 flex justify-between items-center bg-zinc-950/80 backdrop-blur z-10">
+      <div className="p-4 border-b border-cyan-900 flex justify-between items-center bg-zinc-950/80 backdrop-blur z-10">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-          <span className="text-xs tracking-[0.2em] uppercase">
+          <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]"></div>
+          <span className="text-xs tracking-[0.2em] uppercase text-cyan-200">
             {studentName} :: Linked
           </span>
         </div>
-        <div className="text-xl font-bold flex items-center gap-2">
+        <div className="text-xl font-bold flex items-center gap-2 text-cyan-300">
           <Skull size={20} />
           <span>BOSS HP: {hp}</span>
         </div>
@@ -206,43 +204,43 @@ export default function StudentController() {
       {/* Main Display Area */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
         {feedback && (
-          <div className={`absolute top-1/4 text-6xl font-black tracking-tighter animate-bounce ${feedback === 'HIT!' ? 'text-red-500' : 'text-zinc-500'}`}>
+          <div className={`absolute top-1/4 text-6xl font-black tracking-tighter animate-bounce ${feedback === 'HIT!' ? 'text-cyan-400' : 'text-zinc-500'}`}>
             {feedback}
           </div>
         )}
 
         <div className="w-full max-w-lg space-y-6">
            {/* Decorative HUD Elements */}
-           <div className="flex justify-between text-xs opacity-50 uppercase">
+           <div className="flex justify-between text-xs opacity-50 uppercase text-cyan-600">
               <span>Sys.Load: 98%</span>
               <span>Net.Lat: 12ms</span>
            </div>
 
-           <div className="border border-red-900/50 bg-black/50 p-6 rounded relative group">
+           <div className="border border-cyan-900/50 bg-black/50 p-6 rounded relative group shadow-[0_0_20px_rgba(8,145,178,0.1)]">
               {/* Corner Accents */}
-              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-red-500"></div>
-              <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-red-500"></div>
-              <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-red-500"></div>
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-red-500"></div>
+              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-cyan-500"></div>
+              <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-cyan-500"></div>
+              <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-cyan-500"></div>
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-cyan-500"></div>
 
               {isStealth ? (
                 // STEALTH FORM
                 <form onSubmit={handleStealthSubmit} className="space-y-4">
                    <div className="text-center mb-4">
-                      <Zap className="mx-auto mb-2 text-red-700 opacity-50" size={48} />
-                      <h3 className="text-red-400 tracking-widest text-sm uppercase">Manual Override</h3>
+                      <Zap className="mx-auto mb-2 text-cyan-600 opacity-50" size={48} />
+                      <h3 className="text-cyan-500 tracking-widest text-sm uppercase">Manual Override</h3>
                    </div>
                    <input
                     type="text"
                     value={inputChat}
                     onChange={(e) => setInputChat(e.target.value)}
-                    className="w-full bg-zinc-950 border border-red-900 text-red-100 p-4 text-center text-lg focus:outline-none focus:border-red-500 transition-colors uppercase placeholder-red-900/50"
+                    className="w-full bg-zinc-950 border border-cyan-900 text-cyan-100 p-4 text-center text-lg focus:outline-none focus:border-cyan-500 transition-colors uppercase placeholder-cyan-900/50 shadow-inner"
                     placeholder="ENTER COMMAND SEQUENCE..."
                     autoComplete="off"
                    />
                    <button
                     type="submit"
-                    className="w-full bg-red-900/20 hover:bg-red-900/40 border border-red-900 text-red-500 py-3 rounded uppercase tracking-widest transition-all hover:shadow-[0_0_15px_rgba(220,38,38,0.3)]"
+                    className="w-full bg-cyan-900/20 hover:bg-cyan-900/40 border border-cyan-900 text-cyan-400 py-3 rounded uppercase tracking-widest transition-all hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                    >
                     Execute
                    </button>
@@ -251,21 +249,21 @@ export default function StudentController() {
                 // GAME FORM
                 <form onSubmit={handleGameSubmit} className="space-y-4">
                    <div className="text-center mb-4">
-                      <Shield className="mx-auto mb-2 text-red-700 opacity-50" size={48} />
-                      <h3 className="text-red-400 tracking-widest text-sm uppercase">Weapon Systems Active</h3>
+                      <Shield className="mx-auto mb-2 text-cyan-600 opacity-50" size={48} />
+                      <h3 className="text-cyan-500 tracking-widest text-sm uppercase">Weapon Systems Active</h3>
                    </div>
                    <input
                     type="text"
                     value={inputAnswer}
                     onChange={(e) => setInputAnswer(e.target.value)}
-                    className="w-full bg-zinc-950 border border-red-900 text-red-100 p-4 text-center text-2xl font-bold focus:outline-none focus:border-red-500 transition-colors placeholder-red-900/50"
+                    className="w-full bg-zinc-950 border border-cyan-900 text-cyan-100 p-4 text-center text-2xl font-bold focus:outline-none focus:border-cyan-500 transition-colors placeholder-cyan-900/50 shadow-inner"
                     placeholder="ENTER CODE..."
                     autoComplete="off"
                     inputMode="numeric"
                    />
                    <button
                     type="submit"
-                    className="w-full bg-red-600 hover:bg-red-500 text-black font-bold py-3 rounded uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:shadow-[0_0_25px_rgba(220,38,38,0.7)]"
+                    className="w-full bg-cyan-600 hover:bg-cyan-500 text-black font-bold py-3 rounded uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(8,145,178,0.5)] hover:shadow-[0_0_25px_rgba(34,211,238,0.7)]"
                    >
                     FIRE WEAPON
                    </button>
@@ -276,7 +274,7 @@ export default function StudentController() {
       </div>
 
       {/* Footer Status */}
-      <div className="p-2 text-center text-[10px] opacity-30 uppercase tracking-widest">
+      <div className="p-2 text-center text-[10px] opacity-30 uppercase tracking-widest text-cyan-700">
         Zera-Pilot v0.1.4 // Build 2024.10 // {view === 'stealth' ? 'SECURE CHANNEL' : 'PUBLIC CHANNEL'}
       </div>
     </div>
