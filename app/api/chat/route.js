@@ -3,7 +3,17 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const { message } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return NextResponse.json(
+        { error: "Invalid JSON body" },
+        { status: 400 }
+      );
+    }
+
+    const { message, history } = body;
 
     if (!message) {
       return NextResponse.json(
@@ -27,7 +37,16 @@ export async function POST(req) {
     const systemPrompt =
       "You are a Supportive School Counselor. Keep responses short (max 2 sentences), empathetic, and lower-case (to match the 'hacker' aesthetic).";
 
-    const fullPrompt = `${systemPrompt}\n\nUser message: ${message}`;
+    // Build context from history
+    let context = "";
+    if (history && Array.isArray(history)) {
+      context = history.map(msg => {
+        const roleLabel = msg.role === 'user' ? 'Student' : 'Counselor';
+        return `${roleLabel}: ${msg.text}`;
+      }).join("\n");
+    }
+
+    const fullPrompt = `${systemPrompt}\n\nPrevious conversation:\n${context}\n\nStudent: ${message}\nCounselor:`;
 
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
