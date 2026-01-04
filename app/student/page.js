@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -23,6 +23,33 @@ export default function StudentController() {
   const [inputAnswer, setInputAnswer] = useState("");
   const [inputChat, setInputChat] = useState("");
   const [feedback, setFeedback] = useState(null); // 'HIT!', 'MISS', or null
+
+  // Chat State
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const chatEndRef = useRef(null);
+
+  // Load chat history from localStorage on mount
+  useEffect(() => {
+    const savedMessages = localStorage.getItem("chat_history");
+    if (savedMessages) {
+      try {
+        setMessages(JSON.parse(savedMessages));
+      } catch (error) {
+        console.error("Failed to load chat history", error);
+      }
+    }
+  }, []);
+
+  // Save chat history to localStorage whenever messages change
+  useEffect(() => {
+    localStorage.setItem("chat_history", JSON.stringify(messages));
+  }, [messages]);
+
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
 
   // Subscribe to Session Data
   useEffect(() => {
@@ -93,19 +120,49 @@ export default function StudentController() {
     e.preventDefault();
     if (!inputChat.trim()) return;
 
+    const userMsg = { role: "user", text: inputChat };
+    // Optimistic update
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInputChat("");
+    setIsLoading(true);
+
     try {
+      // 1. Log to Firebase (Alerts)
       await addDoc(collection(db, "alerts"), {
         student_name: studentName,
         type: "chat",
-        message: inputChat,
+        message: userMsg.text,
         timestamp: serverTimestamp(),
       });
-      setInputChat("");
-      // Fake feedback to maintain illusion
-      setFeedback("COMMAND SENT");
-      setTimeout(() => setFeedback(null), 1000);
+
+      // 2. Call AI API
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Pass 'messages' (current state before update) as history to avoid duplication,
+        // since the backend appends the current message to the prompt as well.
+        body: JSON.stringify({ message: userMsg.text, history: messages }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessages((prev) => [...prev, { role: "ai", text: data.reply }]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { role: "ai", text: "> [SYSTEM ERROR]: Connection failed." },
+        ]);
+      }
     } catch (err) {
       console.error("Error sending chat:", err);
+      setMessages((prev) => [
+        ...prev,
+        { role: "ai", text: "> [SYSTEM ERROR]: Connection failed." },
+      ]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -225,26 +282,52 @@ export default function StudentController() {
 
               {isStealth ? (
                 // STEALTH FORM
-                <form onSubmit={handleStealthSubmit} className="space-y-4">
-                   <div className="text-center mb-4">
+                <div className="space-y-4">
+                  <div className="text-center mb-4">
                       <Zap className="mx-auto mb-2 text-cyan-600 opacity-50" size={48} />
                       <h3 className="text-cyan-500 tracking-widest text-sm uppercase">Manual Override</h3>
                    </div>
-                   <input
-                    type="text"
-                    value={inputChat}
-                    onChange={(e) => setInputChat(e.target.value)}
-                    className="w-full bg-zinc-950 border border-cyan-900 text-cyan-100 p-4 text-center text-lg focus:outline-none focus:border-cyan-500 transition-colors uppercase placeholder-cyan-900/50 shadow-inner"
-                    placeholder="ENTER COMMAND SEQUENCE..."
-                    autoComplete="off"
-                   />
-                   <button
-                    type="submit"
-                    className="w-full bg-cyan-900/20 hover:bg-cyan-900/40 border border-cyan-900 text-cyan-400 py-3 rounded uppercase tracking-widest transition-all hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]"
-                   >
-                    Execute
-                   </button>
-                </form>
+
+                   {/* Chat Log */}
+                   <div className="bg-black/80 border border-cyan-900/50 p-4 rounded h-64 overflow-y-auto font-mono text-sm shadow-inner mb-4">
+                    {messages.length === 0 && (
+                      <div className="text-cyan-900 text-center mt-20 opacity-50">NO LOGS DETECTED</div>
+                    )}
+                    {messages.map((msg, idx) => (
+                      <div key={idx} className="mb-2">
+                        <span className={msg.role === 'user' ? 'text-cyan-400' : 'text-green-400'}>
+                          {msg.role === 'user' ? '> [STUDENT]:' : '> [SYSTEM]:'}
+                        </span>
+                        <span className="ml-2 text-cyan-100/90">{msg.text}</span>
+                      </div>
+                    ))}
+                    {isLoading && (
+                      <div className="mb-2 animate-pulse">
+                         <span className="text-green-400">{'> [SYSTEM]:'}</span>
+                         <span className="ml-2 text-cyan-100/90">. . .</span>
+                      </div>
+                    )}
+                    <div ref={chatEndRef} />
+                   </div>
+
+                   <form onSubmit={handleStealthSubmit}>
+                    <input
+                      type="text"
+                      value={inputChat}
+                      onChange={(e) => setInputChat(e.target.value)}
+                      className="w-full bg-zinc-950 border border-cyan-900 text-cyan-100 p-4 text-center text-lg focus:outline-none focus:border-cyan-500 transition-colors uppercase placeholder-cyan-900/50 shadow-inner mb-4"
+                      placeholder="ENTER COMMAND SEQUENCE..."
+                      autoComplete="off"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-cyan-900/20 hover:bg-cyan-900/40 border border-cyan-900 text-cyan-400 py-3 rounded uppercase tracking-widest transition-all hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Execute
+                    </button>
+                   </form>
+                </div>
               ) : (
                 // GAME FORM
                 <form onSubmit={handleGameSubmit} className="space-y-4">
