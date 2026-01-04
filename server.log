@@ -7,7 +7,14 @@
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
-✓ Ready in 721ms
-○ Compiling /teacher ...
- GET /teacher 200 in 6.1s (compile: 5.5s, render: 583ms)
- GET /teacher 200 in 1045ms (compile: 364ms, render: 681ms)
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+✓ Ready in 680ms
+○ Compiling /student ...
+ GET /student 200 in 6.2s (compile: 5.6s, render: 585ms)
+ GET /student 200 in 57ms (compile: 5ms, render: 52ms)
+ GET /student 200 in 862ms (compile: 364ms, render: 498ms)
+ GET /student 200 in 61ms (compile: 5ms, render: 56ms)
