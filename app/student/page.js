@@ -84,12 +84,44 @@ export default function StudentController() {
           timestamp: serverTimestamp(),
         });
         setView("stealth");
+        initiateChat();
       } catch (err) {
         console.error("Error sending alert:", err);
       }
     } else {
       // ready or okay
       setView("game");
+    }
+  };
+
+  const initiateChat = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ init: true, history: [] }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessages((prev) => [...prev, { role: "ai", text: data.reply }]);
+      } else {
+        const errMsg = data.error || "Connection failed.";
+        setMessages((prev) => [
+          ...prev,
+          { role: "ai", text: `> [SYSTEM ERROR]: ${errMsg}` },
+        ]);
+      }
+    } catch (err) {
+      console.error("Error initiating chat:", err);
+      setMessages((prev) => [
+        ...prev,
+        { role: "ai", text: `> [SYSTEM ERROR]: ${err.message || "Connection failed."}` },
+      ]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -150,16 +182,17 @@ export default function StudentController() {
       if (res.ok) {
         setMessages((prev) => [...prev, { role: "ai", text: data.reply }]);
       } else {
+        const errMsg = data.error || "Connection failed.";
         setMessages((prev) => [
           ...prev,
-          { role: "ai", text: "> [SYSTEM ERROR]: Connection failed." },
+          { role: "ai", text: `> [SYSTEM ERROR]: ${errMsg}` },
         ]);
       }
     } catch (err) {
       console.error("Error sending chat:", err);
       setMessages((prev) => [
         ...prev,
-        { role: "ai", text: "> [SYSTEM ERROR]: Connection failed." },
+        { role: "ai", text: `> [SYSTEM ERROR]: ${err.message || "Connection failed."}` },
       ]);
     } finally {
       setIsLoading(false);
