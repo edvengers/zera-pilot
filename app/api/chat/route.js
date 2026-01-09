@@ -32,7 +32,7 @@ export async function POST(req) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
     const systemPrompt =
       "You are a Supportive School Counselor. Keep responses short (max 2 sentences), empathetic, and lower-case (to match the 'hacker' aesthetic).";
@@ -60,8 +60,9 @@ export async function POST(req) {
     return NextResponse.json({ reply: text });
   } catch (error) {
     console.error("Error generating content:", error);
+    // Return a generic, user-friendly error message to the client
     return NextResponse.json(
-      { error: error.message || "Failed to generate response" },
+      { error: "Counselor currently unavailable." },
       { status: 500 }
     );
   }
