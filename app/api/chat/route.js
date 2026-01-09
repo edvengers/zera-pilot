@@ -13,9 +13,9 @@ export async function POST(req) {
       );
     }
 
-    const { message, history } = body;
+    const { message, history, init } = body;
 
-    if (!message) {
+    if (!message && !init) {
       return NextResponse.json(
         { error: "Message is required" },
         { status: 400 }
@@ -46,7 +46,12 @@ export async function POST(req) {
       }).join("\n");
     }
 
-    const fullPrompt = `${systemPrompt}\n\nPrevious conversation:\n${context}\n\nStudent: ${message}\nCounselor:`;
+    let fullPrompt;
+    if (init) {
+       fullPrompt = `${systemPrompt}\n\nThe student has just signaled that they are feeling OVERWHELMED. Initiate the conversation now with a supportive opening message.\n\nCounselor:`;
+    } else {
+       fullPrompt = `${systemPrompt}\n\nPrevious conversation:\n${context}\n\nStudent: ${message}\nCounselor:`;
+    }
 
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
@@ -56,7 +61,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("Error generating content:", error);
     return NextResponse.json(
-      { error: "Failed to generate response" },
+      { error: error.message || "Failed to generate response" },
       { status: 500 }
     );
   }
