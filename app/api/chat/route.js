@@ -13,7 +13,7 @@ export async function POST(req) {
       );
     }
 
-    const { message, history, init } = body;
+    const { message, history, init, language } = body;
 
     if (!message && !init) {
       return NextResponse.json(
@@ -34,8 +34,17 @@ export async function POST(req) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-    const systemPrompt =
-      "You are a Supportive School Counselor. Keep responses short (max 2 sentences), empathetic, and lower-case (to match the 'hacker' aesthetic).";
+    let systemPrompt = "You are a Supportive School Counselor with a 'hacker' aesthetic. ";
+    systemPrompt += "Rules: 1) Keep responses short (max 2 sentences). 2) Use all lower-case. 3) Be empathetic but casual. ";
+
+    if (language === 'mandarin') {
+      systemPrompt += "4) Speak in casual, culturally adapted Mandarin (Chinese). Be warm and friendly, not robotic. ";
+    } else {
+      systemPrompt += "4) Speak in casual English. ";
+    }
+
+    systemPrompt += "Your Goal: Help a student who is feeling overwhelmed. ";
+    systemPrompt += "Strategy: First, validate their feelings. Then, actively ask specific investigating questions (Who, What, Where, When, Why, How) to get details about their situation. Don't be passive. Drill down into the problem while remaining supportive.";
 
     // Build context from history
     let context = "";
@@ -48,7 +57,7 @@ export async function POST(req) {
 
     let fullPrompt;
     if (init) {
-       fullPrompt = `${systemPrompt}\n\nThe student has just signaled that they are feeling OVERWHELMED. Initiate the conversation now with a supportive opening message.\n\nCounselor:`;
+       fullPrompt = `${systemPrompt}\n\nThe student has just signaled that they are feeling OVERWHELMED. Initiate the conversation now with a supportive opening message that encourages them to open up.\n\nCounselor:`;
     } else {
        fullPrompt = `${systemPrompt}\n\nPrevious conversation:\n${context}\n\nStudent: ${message}\nCounselor:`;
     }

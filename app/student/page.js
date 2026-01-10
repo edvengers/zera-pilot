@@ -23,6 +23,7 @@ export default function StudentController() {
   const [inputAnswer, setInputAnswer] = useState("");
   const [inputChat, setInputChat] = useState("");
   const [feedback, setFeedback] = useState(null); // 'HIT!', 'MISS', or null
+  const [language, setLanguage] = useState(null); // 'english' or 'mandarin'
 
   // Chat State
   const [messages, setMessages] = useState([]);
@@ -83,8 +84,7 @@ export default function StudentController() {
           message: "Status: Overwhelmed",
           timestamp: serverTimestamp(),
         });
-        setView("stealth");
-        initiateChat();
+        setView("language-select");
       } catch (err) {
         console.error("Error sending alert:", err);
       }
@@ -94,13 +94,19 @@ export default function StudentController() {
     }
   };
 
-  const initiateChat = async () => {
+  const handleLanguageSelect = (selectedLang) => {
+    setLanguage(selectedLang);
+    setView("stealth");
+    initiateChat(selectedLang);
+  };
+
+  const initiateChat = async (selectedLang) => {
     setIsLoading(true);
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ init: true, history: [] }),
+        body: JSON.stringify({ init: true, history: [], language: selectedLang }),
       });
 
       const data = await res.json();
@@ -174,7 +180,7 @@ export default function StudentController() {
         headers: { "Content-Type": "application/json" },
         // Pass 'messages' (current state before update) as history to avoid duplication,
         // since the backend appends the current message to the prompt as well.
-        body: JSON.stringify({ message: userMsg.text, history: messages }),
+        body: JSON.stringify({ message: userMsg.text, history: messages, language }),
       });
 
       const data = await res.json();
@@ -228,6 +234,32 @@ export default function StudentController() {
               Initialize Link
             </button>
           </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "language-select") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4 font-sans">
+        <div className="max-w-md w-full text-center space-y-8">
+          <h2 className="text-3xl font-bold mb-8">Select Language</h2>
+          <div className="grid gap-4">
+            <button
+              onClick={() => handleLanguageSelect("english")}
+              className="p-6 bg-zinc-900 hover:bg-zinc-800 rounded-xl border border-zinc-800 transition-all transform hover:scale-105"
+            >
+              <div className="text-4xl mb-2">🇺🇸</div>
+              <div className="font-semibold text-lg">English</div>
+            </button>
+            <button
+              onClick={() => handleLanguageSelect("mandarin")}
+              className="p-6 bg-zinc-900 hover:bg-zinc-800 rounded-xl border border-zinc-800 transition-all transform hover:scale-105"
+            >
+              <div className="text-4xl mb-2">🇨🇳</div>
+              <div className="font-semibold text-lg">Mandarin</div>
+            </button>
+          </div>
         </div>
       </div>
     );
